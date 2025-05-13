@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Define the block structure
+struct DiskBlock {
+    char data[100];      // Data stored in the block
+    struct DiskBlock* next; // Pointer to the next block
+};
+
+// Define the file structure (which will store pointers to the first and last blocks)
+struct File {
+    struct DiskBlock* firstBlock; // Pointer to the first block
+    struct DiskBlock* lastBlock;  // Pointer to the last block
+};
+
+// Function to create a new disk block
+struct DiskBlock* createBlock(const char* data) {
+    struct DiskBlock* newBlock = (struct DiskBlock*)malloc(sizeof(struct DiskBlock));
+    if (newBlock == NULL) {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+    strncpy(newBlock->data, data, sizeof(newBlock->data) - 1);
+    newBlock->data[sizeof(newBlock->data) - 1] = '\0';  // Ensure null-termination
+    newBlock->next = NULL;
+    return newBlock;
+}
+
+// Function to initialize a file
+void initFile(struct File* file) {
+    file->firstBlock = NULL;
+    file->lastBlock = NULL;
+}
+
+// Function to add a block to a file
+void addBlockToFile(struct File* file, const char* data) {
+    struct DiskBlock* newBlock = createBlock(data);
+    
+    if (file->firstBlock == NULL) {
+        // If the file is empty, the first block is the new block
+        file->firstBlock = newBlock;
+        file->lastBlock = newBlock;
+    } else {
+        // Otherwise, append the block to the end
+        file->lastBlock->next = newBlock;
+        file->lastBlock = newBlock;
+    }
+}
+
+// Function to display the file contents
+void displayFile(struct File* file) {
+    struct DiskBlock* current = file->firstBlock;
+    int blockNumber = 1;
+    
+    while (current != NULL) {
+        printf("Block %d: %s\n", blockNumber, current->data);
+        current = current->next;
+        blockNumber++;
+    }
+}
+
+// Function to free the allocated memory for the file
+void freeFile(struct File* file) {
+    struct DiskBlock* current = file->firstBlock;
+    struct DiskBlock* next;
+    
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    file->firstBlock = NULL;
+    file->lastBlock = NULL;
+}
+
+int main() {
+    // Create a file
+    struct File myFile;
+    initFile(&myFile);
+
+    // Add blocks to the file
+    addBlockToFile(&myFile, "This is the first block of the file.");
+    addBlockToFile(&myFile, "This is the second block of the file.");
+    addBlockToFile(&myFile, "This is the third block of the file.");
+
+    // Display the file contents
+    printf("File contents:\n");
+    displayFile(&myFile);
+
+    // Free allocated memory
+    freeFile(&myFile);
+
+    return 0;
+}

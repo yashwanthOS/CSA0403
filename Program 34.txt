@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_RECORDS 5
+
+// Define a structure for the record
+typedef struct {
+    int id;
+    char data[100];
+} Record;
+
+// Function to read a record from the file system
+void readRecord(Record *file, int index) {
+    printf("Record %d - ID: %d, Data: %s\n", index + 1, file[index].id, file[index].data);
+}
+
+int main() {
+    Record file[MAX_RECORDS]; // Array of records (simulating file storage)
+    int i;
+    
+    // Simulating the file system with sequential records
+    printf("Simulating Sequential File Allocation\n");
+    
+    // Input records
+    for (i = 0; i < MAX_RECORDS; i++) {
+        file[i].id = i + 1;
+        printf("Enter data for Record %d: ", i + 1);
+        getchar(); // To consume newline character from previous input
+        fgets(file[i].data, sizeof(file[i].data), stdin);
+    }
+
+    // Accessing and displaying records sequentially
+    printf("\nAccessing records sequentially:\n");
+    for (i = 0; i < MAX_RECORDS; i++) {
+        readRecord(file, i); // Sequential read
+    }
+
+    return 0;
+}

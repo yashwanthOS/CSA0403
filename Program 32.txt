@@ -1,0 +1,74 @@
+#include <stdio.h>
+
+#define MAX 100
+
+// Function to find the index of the least recently used page
+int findLRU(int time[], int n) {
+    int i, min = time[0], index = 0;
+    for (i = 1; i < n; i++) {
+        if (time[i] < min) {
+            min = time[i];
+            index = i;
+        }
+    }
+    return index;
+}
+
+int main() {
+    int pages[MAX], frames[MAX], time[MAX];
+    int n, f, i, j, k, pageFaults = 0, hit;
+    
+    // Input number of pages
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter the page reference string:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    // Input number of frames
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    // Initialize frames and time array
+    for (i = 0; i < f; i++) {
+        frames[i] = -1;
+        time[i] = -1; // Time initially as -1, meaning the page hasn't been used yet
+    }
+
+    // LRU Page Replacement Logic
+    for (i = 0; i < n; i++) {
+        hit = 0;
+
+        // Check if the page is already in one of the frames
+        for (j = 0; j < f; j++) {
+            if (frames[j] == pages[i]) {
+                hit = 1;
+                time[j] = i; // Update time of the page to the current index (latest usage)
+                break;
+            }
+        }
+
+        // If there is a page fault
+        if (!hit) {
+            int lruIndex = findLRU(time, f); // Find the LRU page to replace
+            frames[lruIndex] = pages[i]; // Replace the LRU page with the new page
+            time[lruIndex] = i; // Update the time for the new page
+            pageFaults++;
+        }
+
+        // Print current frame status
+        printf("Frames: ");
+        for (k = 0; k < f; k++) {
+            if (frames[k] != -1)
+                printf("%d ", frames[k]);
+            else
+                printf("- ");
+        }
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults = %d\n", pageFaults);
+    return 0;
+}

@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Comparator for ascending order sorting
+int compare(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
+void CSCAN(int requests[], int n, int head, int disk_size) {
+    int i, total_movement = 0;
+
+    // Sort the request array
+    qsort(requests, n, sizeof(int), compare);
+
+    // Separate requests into two parts: greater and smaller than head
+    int left[100], right[100];
+    int left_count = 0, right_count = 0;
+
+    for (i = 0; i < n; i++) {
+        if (requests[i] >= head)
+            right[right_count++] = requests[i];
+        else
+            left[left_count++] = requests[i];
+    }
+
+    printf("Disk Head Movement:\nStart at: %d\n", head);
+
+    // Move to the right (towards higher cylinders)
+    for (i = 0; i < right_count; i++) {
+        printf("Move from %d to %d, Distance = %d\n", head, right[i], abs(head - right[i]));
+        total_movement += abs(head - right[i]);
+        head = right[i];
+    }
+
+    // Move to end of disk (if not already there)
+    if (head != disk_size - 1) {
+        printf("Move from %d to %d (end), Distance = %d\n", head, disk_size - 1, abs(head - (disk_size - 1)));
+        total_movement += abs(head - (disk_size - 1));
+        head = disk_size - 1;
+    }
+
+    // Jump to beginning (0)
+    printf("Jump from %d to 0, Distance = %d\n", head, disk_size - 1);
+    total_movement += disk_size - 1;
+    head = 0;
+
+    // Continue servicing remaining requests from the beginning
+    for (i = 0; i < left_count; i++) {
+        printf("Move from %d to %d, Distance = %d\n", head, left[i], abs(head - left[i]));
+        total_movement += abs(head - left[i]);
+        head = left[i];
+    }
+
+    printf("\nTotal Head Movement = %d cylinders\n", total_movement);
+}
+
+int main() {
+    int n, head, disk_size;
+
+    printf("Enter number of disk requests: ");
+    scanf("%d", &n);
+
+    int requests[n];
+    printf("Enter the disk request queue:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("Enter total disk size (number of cylinders): ");
+    scanf("%d", &disk_size);
+
+    CSCAN(requests, n, head, disk_size);
+
+    return 0;
+}

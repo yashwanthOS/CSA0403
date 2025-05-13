@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 5   // Maximum number of data blocks in the file
+#define MAX_FILE_SIZE 50 // Maximum file size (in bytes)
+
+typedef struct {
+    int block_no;
+    char data[MAX_FILE_SIZE];
+} FileBlock;
+
+typedef struct {
+    FileBlock *blocks[MAX_BLOCKS];  // Array of pointers to data blocks
+} IndexBlock;
+
+void createFile(IndexBlock *indexBlock) {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        indexBlock->blocks[i] = NULL;  // Initially set all pointers to NULL
+    }
+}
+
+void allocateBlock(IndexBlock *indexBlock, int blockIndex, const char *data) {
+    if (blockIndex < 0 || blockIndex >= MAX_BLOCKS) {
+        printf("Invalid block index!\n");
+        return;
+    }
+
+    FileBlock *newBlock = (FileBlock *)malloc(sizeof(FileBlock));
+    newBlock->block_no = blockIndex;
+    snprintf(newBlock->data, MAX_FILE_SIZE, "%s", data);
+
+    indexBlock->blocks[blockIndex] = newBlock;
+}
+
+void displayFile(IndexBlock *indexBlock) {
+    printf("Displaying file contents:\n");
+
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (indexBlock->blocks[i] != NULL) {
+            printf("Block %d: %s\n", i, indexBlock->blocks[i]->data);
+        }
+    }
+}
+
+void deallocateBlock(IndexBlock *indexBlock, int blockIndex) {
+    if (blockIndex < 0 || blockIndex >= MAX_BLOCKS || indexBlock->blocks[blockIndex] == NULL) {
+        printf("Block %d is not allocated or invalid.\n", blockIndex);
+        return;
+    }
+
+    free(indexBlock->blocks[blockIndex]);
+    indexBlock->blocks[blockIndex] = NULL;  // Mark the block as deallocated
+}
+
+int main() {
+    IndexBlock indexBlock;
+    createFile(&indexBlock);  // Initialize the file system with empty blocks
+
+    // Allocate blocks with data
+    allocateBlock(&indexBlock, 0, "This is block 0 data.");
+    allocateBlock(&indexBlock, 1, "This is block 1 data.");
+    allocateBlock(&indexBlock, 2, "This is block 2 data.");
+    allocateBlock(&indexBlock, 3, "This is block 3 data.");
+    allocateBlock(&indexBlock, 4, "This is block 4 data.");
+
+    // Display the file contents
+    displayFile(&indexBlock);
+
+    // Deallocate a block
+    deallocateBlock(&indexBlock, 2);
+    printf("\nAfter deallocating block 2:\n");
+    displayFile(&indexBlock);
+
+    // Try to allocate data to a deallocated block
+    allocateBlock(&indexBlock, 2, "This is new data for block 2.");
+    printf("\nAfter reallocating block 2:\n");
+    displayFile(&indexBlock);
+
+    return 0;
+}

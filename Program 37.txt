@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void FCFS(int requests[], int n, int head) {
+    int total_movement = 0;
+    printf("Disk Head Movement:\n");
+    printf("Start at: %d\n", head);
+
+    for (int i = 0; i < n; i++) {
+        int distance = abs(requests[i] - head);
+        printf("Move from %d to %d, Distance = %d\n", head, requests[i], distance);
+        total_movement += distance;
+        head = requests[i];
+    }
+
+    printf("\nTotal Head Movement = %d cylinders\n", total_movement);
+}
+
+int main() {
+    int n, head;
+
+    printf("Enter number of disk requests: ");
+    scanf("%d", &n);
+
+    int requests[n];
+    printf("Enter disk requests (cylinder numbers):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    FCFS(requests, n, head);
+
+    return 0;
+}

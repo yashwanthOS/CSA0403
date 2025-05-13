@@ -1,0 +1,84 @@
+#include <stdio.h>
+
+#define MAX 100
+
+// Function to find the index of the page that will not be used for the longest time in the future
+int findOptimal(int pages[], int frames[], int n, int f, int current) {
+    int i, j, maxDist = -1, index = -1;
+    for (i = 0; i < f; i++) {
+        int found = 0;
+        // Check if the page is present in the frames
+        for (j = current + 1; j < n; j++) {
+            if (frames[i] == pages[j]) {
+                found = 1;
+                // Update the maximum distance for the page that will be used furthest in the future
+                if (j > maxDist) {
+                    maxDist = j;
+                    index = i;
+                }
+                break;
+            }
+        }
+        // If the page is not found in future references, it will be replaced
+        if (!found) {
+            return i;
+        }
+    }
+    return index;
+}
+
+int main() {
+    int pages[MAX], frames[MAX];
+    int n, f, i, j, k, pageFaults = 0;
+
+    // Input number of pages
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter the page reference string:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    // Input number of frames
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    // Initialize frames with -1 (empty)
+    for (i = 0; i < f; i++) {
+        frames[i] = -1;
+    }
+
+    // Optimal Page Replacement Logic
+    for (i = 0; i < n; i++) {
+        int found = 0;
+
+        // Check if the page is already in a frame
+        for (j = 0; j < f; j++) {
+            if (frames[j] == pages[i]) {
+                found = 1;
+                break;
+            }
+        }
+
+        // If page is not found, it's a page fault
+        if (!found) {
+            int replaceIndex = findOptimal(pages, frames, n, f, i);
+            frames[replaceIndex] = pages[i]; // Replace the page in the selected frame
+            pageFaults++;
+        }
+
+        // Print current frame status
+        printf("Frames: ");
+        for (k = 0; k < f; k++) {
+            if (frames[k] != -1)
+                printf("%d ", frames[k]);
+            else
+                printf("- ");
+        }
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults = %d\n", pageFaults);
+    return 0;
+}
