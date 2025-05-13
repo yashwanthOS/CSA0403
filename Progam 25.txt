@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+
+int main() {
+    int fd;
+    struct stat fileStat;
+    struct dirent *entry;
+    DIR *dir;
+
+    // --------- fcntl() and open() ---------
+    fd = open("sample.txt", O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        perror("Error opening file");
+        return 1;
+    }
+    printf("File 'sample.txt' opened successfully.\n");
+
+    // --------- fcntl() ---------
+    int flags = fcntl(fd, F_GETFL);
+    if (flags < 0) {
+        perror("fcntl failed");
+    } else {
+        printf("fcntl: File flags are %d\n", flags);
+    }
+
+    // --------- write and lseek() ---------
+    char data[] = "UNIX system call test for lseek\n";
+    write(fd, data, strlen(data));
+    lseek(fd, 0, SEEK_SET); // Move pointer back to beginning
+
+    // --------- stat() ---------
+    if (stat("sample.txt", &fileStat) < 0) {
+        perror("stat failed");
+    } else {
+        printf("\nFile Information:\n");
+        printf("File size: %ld bytes\n", fileStat.st_size);
+        printf("Number of links: %ld\n", fileStat.st_nlink);
+        printf("File inode: %ld\n", fileStat.st_ino);
+    }
+
+    close(fd);
+
+    // --------- opendir() and readdir() ---------
+    dir = opendir(".");
+    if (dir == NULL) {
+        perror("Unable to open directory");
+        return 1;
+    }
+
+    printf("\nContents of current directory:\n");
+    while ((entry = readdir(dir)) != NULL) {
+        printf("  %s\n", entry->d_name);
+    }
+
+    closedir(dir);
+    return 0;
+}

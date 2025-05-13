@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 5  // Buffer size
+
+int buffer[SIZE];
+int in = 0, out = 0;
+
+int mutex = 1;   // For mutual exclusion
+int full = 0;    // Count of full slots
+int empty = SIZE; // Count of empty slots
+
+// Semaphore operations
+void wait(int *s) {
+    while (*s <= 0); // Busy wait
+    (*s)--;
+}
+
+void signal(int *s) {
+    (*s)++;
+}
+
+// Producer
+void produce(int item) {
+    wait(&empty);
+    wait(&mutex);
+
+    buffer[in] = item;
+    printf("Produced: %d\n", item);
+    in = (in + 1) % SIZE;
+
+    signal(&mutex);
+    signal(&full);
+}
+
+// Consumer
+void consume() {
+    wait(&full);
+    wait(&mutex);
+
+    int item = buffer[out];
+    printf("Consumed: %d\n", item);
+    out = (out + 1) % SIZE;
+
+    signal(&mutex);
+    signal(&empty);
+}
+
+int main() {
+    int choice, item;
+
+    printf("Producer-Consumer Problem using Semaphores (Simulated)\n");
+
+    while (1) {
+        printf("\n1. Produce\n2. Consume\n3. Exit\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                if ((empty == 0)) {
+                    printf("Buffer is full! Cannot produce.\n");
+                } else {
+                    printf("Enter item to produce: ");
+                    scanf("%d", &item);
+                    produce(item);
+                }
+                break;
+            case 2:
+                if ((full == 0)) {
+                    printf("Buffer is empty! Cannot consume.\n");
+                } else {
+                    consume();
+                }
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+
+    return 0;
+}

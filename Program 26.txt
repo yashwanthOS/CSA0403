@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    FILE *fp;
+    char filename[100] = "example.txt";
+    char newname[100] = "renamed_example.txt";
+    char data[100];
+
+    // ----------- Create and Write to a File -----------
+    fp = fopen(filename, "w");
+    if (fp == NULL) {
+        perror("Error creating file");
+        return 1;
+    }
+    fprintf(fp, "This is the first line in the file.\n");
+    fprintf(fp, "This file is created and written using C.\n");
+    fclose(fp);
+    printf("File '%s' created and written successfully.\n", filename);
+
+    // ----------- Read from the File -----------
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        perror("Error opening file for reading");
+        return 1;
+    }
+    printf("\nReading content from '%s':\n", filename);
+    while (fgets(data, sizeof(data), fp)) {
+        printf("%s", data);
+    }
+    fclose(fp);
+
+    // ----------- Append Data to the File -----------
+    fp = fopen(filename, "a");
+    if (fp == NULL) {
+        perror("Error opening file for appending");
+        return 1;
+    }
+    fprintf(fp, "This is an appended line.\n");
+    fclose(fp);
+    printf("\nData appended to the file '%s'.\n", filename);
+
+    // ----------- Rename the File -----------
+    if (rename(filename, newname) == 0) {
+        printf("File renamed from '%s' to '%s'.\n", filename, newname);
+    } else {
+        perror("Error renaming file");
+    }
+
+    // ----------- Delete the File -----------
+    if (remove(newname) == 0) {
+        printf("File '%s' deleted successfully.\n", newname);
+    } else {
+        perror("Error deleting file");
+    }
+
+    return 0;
+}
