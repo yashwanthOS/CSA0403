@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_TEXT 100
+
+// Define the message structure
+struct message {
+    long msg_type;              // Message type
+    char msg_text[MAX_TEXT];    // Message text
+};
+
+int main() {
+    key_t key = 1234;  // Unique key for message queue
+    int msgid;
+    struct message msg;
+
+    // Create a message queue or get its ID
+    msgid = msgget(key, 0666 | IPC_CREAT); // 0666 permission for read/write access
+    if (msgid == -1) {
+        perror("msgget failed");
+        exit(1);
+    }
+
+    // Producer: Send a message to the message queue
+    msg.msg_type = 1;  // Message type
+    printf("Producer: Enter message: ");
+    fgets(msg.msg_text, MAX_TEXT, stdin);  // Read the message
+    msg.msg_text[strlen(msg.msg_text) - 1] = '\0';  // Remove newline
+
+    // Send message to the queue
+    if (msgsnd(msgid, &msg, sizeof(msg), 0) == -1) {
+        perror("msgsnd failed");
+        exit(1);
+    }
+
+    printf("Producer: Message sent: %s\n", msg.msg_text);
+
+    return 0;
+}
+
+
+
+
+
+
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_TEXT 100
+
+// Define the message structure
+struct message {
+    long msg_type;              // Message type
+    char msg_text[MAX_TEXT];    // Message text
+};
+
+int main() {
+    key_t key = 1234;  // Unique key for message queue
+    int msgid;
+    struct message msg;
+
+    // Get the message queue ID
+    msgid = msgget(key, 0666);
+    if (msgid == -1) {
+        perror("msgget failed");
+        exit(1);
+    }
+
+    // Consumer: Receive a message from the message queue
+    if (msgrcv(msgid, &msg, sizeof(msg), 1, 0) == -1) {
+        perror("msgrcv failed");
+        exit(1);
+    }
+
+    printf("Consumer: Received message: %s\n", msg.msg_text);
+
+    // Cleanup: Remove the message queue (optional)
+    if (msgctl(msgid, IPC_RMID, NULL) == -1) {
+        perror("msgctl failed");
+        exit(1);
+    }
+
+    return 0;
+}

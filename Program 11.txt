@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <pthread.h>
+
+// Function to calculate sum from start to end
+void* calculate_sum(void* arg) {
+    int* start_end = (int*)arg;
+    int start = start_end[0];
+    int end = start_end[1];
+    int sum = 0;
+    
+    for (int i = start; i <= end; i++) {
+        sum += i;
+    }
+    
+    printf("Sum from %d to %d: %d\n", start, end, sum);
+    pthread_exit(NULL);  // Exit the thread
+}
+
+int main() {
+    pthread_t thread1, thread2;
+    int range1[] = {1, 5};  // Range for thread 1 (sum from 1 to 5)
+    int range2[] = {6, 10}; // Range for thread 2 (sum from 6 to 10)
+
+    // Create thread 1
+    if (pthread_create(&thread1, NULL, calculate_sum, (void*)range1) != 0) {
+        perror("Thread 1 creation failed");
+        return 1;
+    }
+
+    // Create thread 2
+    if (pthread_create(&thread2, NULL, calculate_sum, (void*)range2) != 0) {
+        perror("Thread 2 creation failed");
+        return 1;
+    }
+
+    // Wait for thread 1 to complete
+    pthread_join(thread1, NULL);
+    // Wait for thread 2 to complete
+    pthread_join(thread2, NULL);
+
+    printf("Both threads completed.\n");
+    return 0;
+}

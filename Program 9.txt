@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <string.h>
+
+#define SHM_SIZE 1024  // Shared memory size
+
+int main() {
+    key_t key = 1234;  // Shared memory key
+    int shmid;
+    char *shm_ptr;
+
+    // Create a shared memory segment
+    shmid = shmget(key, SHM_SIZE, 0666|IPC_CREAT);
+    if (shmid == -1) {
+        perror("shmget failed");
+        return 1;
+    }
+
+    // Attach the shared memory segment
+    shm_ptr = shmat(shmid, NULL, 0);
+    if (shm_ptr == (char*)-1) {
+        perror("shmat failed");
+        return 1;
+    }
+
+    // Producer: Write to shared memory
+    printf("Producer: Enter some data to write to shared memory: ");
+    fgets(shm_ptr, SHM_SIZE, stdin);  // Write data to shared memory
+
+    // Detach from shared memory
+    if (shmdt(shm_ptr) == -1) {
+        perror("shmdt failed");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <string.h>
+
+#define SHM_SIZE 1024  // Shared memory size
+
+int main() {
+    key_t key = 1234;  // Shared memory key
+    int shmid;
+    char *shm_ptr;
+
+    // Get the shared memory segment
+    shmid = shmget(key, SHM_SIZE, 0666);
+    if (shmid == -1) {
+        perror("shmget failed");
+        return 1;
+    }
+
+    // Attach the shared memory segment
+    shm_ptr = shmat(shmid, NULL, 0);
+    if (shm_ptr == (char*)-1) {
+        perror("shmat failed");
+        return 1;
+    }
+
+    // Consumer: Read from shared memory
+    printf("Consumer: Data read from shared memory: %s\n", shm_ptr);
+
+    // Detach from shared memory
+    if (shmdt(shm_ptr) == -1) {
+        perror("shmdt failed");
+        return 1;
+    }
+
+    return 0;
+}
